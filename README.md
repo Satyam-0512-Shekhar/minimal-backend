@@ -1,65 +1,265 @@
-# Minimal Flask Backend
+# Containerized Flask + PostgreSQL Backend
 
-A simple backend application built using Python and Flask that demonstrates the HTTP request-response cycle by exposing two JSON API endpoints.
+A minimal Flask backend demonstrating the Repository Pattern with PostgreSQL running in Docker. This project replaces an in-memory repository with a PostgreSQL repository while keeping the service and route layers unchanged.
 
+---
+
+## Assignment
+
+**Code:** BE-04  
+**Track:** Backend AI Engineering  
+**Phase:** Foundations
+
+---
 
 ## Features
 
-- Built with Flask
-- Two JSON API endpoints
-- Lightweight and beginner-friendly
-- Easy to run locally
+- Flask REST API
+- PostgreSQL running in Docker
+- Docker Compose for running the entire stack
+- Repository Pattern
+- Service Layer
+- Environment variables using `.env`
+- Persistent PostgreSQL storage using Docker Volumes
 
 ---
 
 ## Project Structure
 
-```
+```text
 minimal-backend/
-│── .venv/
-│── app.py
-│── requirements.txt
-│── README.md
-└── .gitignore
+│
+├── database/
+│   ├── db.py
+│   └── init.sql
+│
+├── repositories/
+│   ├── repository_interface.py
+│   ├── memory_repository.py
+│   └── postgres_repository.py
+│
+├── routes/
+│   └── patient_routes.py
+│
+├── services/
+│   └── patient_services.py
+│
+├── .env.example
+├── .gitignore
+├── app.py
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-## Prerequisites
+# Architecture
 
-Before running the project, make sure you have:
+```text
+Postman
+      │
+      ▼
+Flask Routes
+      │
+      ▼
+Patient Service
+      │
+      ▼
+Repository Interface
+      │
+ ┌────┴──────────┐
+ │               │
+ ▼               ▼
+Memory      PostgreSQL
+Repository   Repository
+```
 
-- Python 3.x installed
-- pip (Python Package Manager)
+Only the repository implementation changes.
+
+The service layer and route layer remain unchanged.
 
 ---
 
-## Installation
+# Technologies Used
 
-### 1. Clone the repository
+- Python 3.12
+- Flask
+- PostgreSQL
+- Docker
+- Docker Compose
+- Psycopg 3
+- python-dotenv
+
+---
+
+# Setup
+
+## Clone Repository
 
 ```bash
-git clone https://github.com/<your-username>/minimal-backend.git
+git clone <repository-url>
 cd minimal-backend
 ```
 
-### 2. Create a virtual environment
+---
 
-Windows
+## Create Environment File
 
-```bash
-python -m venv .venv
+Create a `.env` file.
+
+Example:
+
+```env
+DATABASE_URL=postgresql://postgres:password@postgres:5432/accessmed
 ```
 
-### 3. Activate the virtual environment
+---
 
-Windows (Command Prompt)
+## Run the Project
 
 ```bash
-.venv\Scripts\activate
+docker compose up --build
 ```
 
-### 4. Install the dependencies
+The entire stack (Flask + PostgreSQL) starts with one command.
+
+---
+
+# API Endpoints
+
+## GET Patients
+
+```http
+GET /patients
+```
+
+Response
+
+```json
+[]
+```
+
+---
+
+## Create Patient
+
+```http
+POST /patients
+```
+
+Request
+
+```json
+{
+    "name": "Satyam",
+    "age": 20,
+    "disease": "Flu"
+}
+```
+
+Response
+
+```json
+{
+    "id": 1,
+    "name": "Satyam",
+    "age": 20,
+    "disease": "Flu"
+}
+```
+
+---
+
+# Repository Swap
+
+The application follows the Repository Pattern.
+
+Initially, data could be stored using the in-memory repository.
+
+For this assignment, the repository implementation was changed to PostgreSQL.
+
+No changes were required in:
+
+- Service Layer
+- Route Layer
+
+Only the repository implementation changed.
+
+---
+
+# Database Initialization
+
+Database tables are automatically created using
+
+```text
+database/init.sql
+```
+
+when PostgreSQL starts for the first time.
+
+---
+
+# Persistence Verification
+
+Persistence was verified using the following process:
+
+1. Started the application using
+
+```bash
+docker compose up
+```
+
+2. Created patient records using the POST endpoint.
+
+3. Verified records using the GET endpoint.
+
+4. Stopped the containers.
+
+```bash
+docker compose down
+```
+
+5. Started the stack again.
+
+```bash
+docker compose up
+```
+
+6. Retrieved the records again using
+
+```http
+GET /patients
+```
+
+The records remained available, confirming that PostgreSQL data persisted through the Docker volume.
+
+---
+
+# Environment Variables
+
+`.env` is excluded from Git.
+
+A sample configuration is provided in
+
+```text
+.env.example
+```
+
+---
+
+# Docker Volume
+
+PostgreSQL uses a named Docker volume for persistent storage.
+
+This ensures that data survives container restarts.
+
+---
+
+# Requirements
+
+Install dependencies locally (optional):
 
 ```bash
 pip install -r requirements.txt
@@ -67,95 +267,20 @@ pip install -r requirements.txt
 
 ---
 
-## Running the Server
+# Future Improvements
 
-Start the Flask development server:
-
-```bash
-py app.py
-```
-
-The server will start at:
-
-```
-http://127.0.0.1:5000/
-```
+- JWT Authentication
+- Redis Caching
+- User Management
+- CRUD Operations
+- API Validation
+- Logging
+- Unit Testing
 
 ---
 
-## API Endpoints
-
-### GET /
-
-Returns a welcome message.
-
-Response
-
-```json
-{
-    "message": "Hello from my backend!"
-}
-```
-
----
-
-### GET /about
-
-Returns information about the developer.
-
-Response
-
-```json
-{
-    "name": "Satyam Shekhar",
-    "course": "BCA",
-    "backend": "Flask"
-}
-```
-
----
-
-## Testing the API
-
-### Using Browser
-
-Open:
-
-```
-http://127.0.0.1:5000/
-```
-
-and
-
-```
-http://127.0.0.1:5000/about
-```
-
----
-
-### Using curl
-
-```bash
-curl http://127.0.0.1:5000/
-```
-
-```bash
-curl http://127.0.0.1:5000/about
-```
-
----
-
-## Technologies Used
-
-- Python
-- Flask
-- REST API
-- JSON
-
----
-
-## Author
+# Author
 
 Satyam Shekhar
 
-BCA Student | Backend Development Enthusiast
+Backend AI Engineering Track
