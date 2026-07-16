@@ -1,286 +1,264 @@
-# Containerized Flask + PostgreSQL Backend
+# 🚀 Minimal Backend API
 
-A minimal Flask backend demonstrating the Repository Pattern with PostgreSQL running in Docker. This project replaces an in-memory repository with a PostgreSQL repository while keeping the service and route layers unchanged.
+A Dockerized Flask backend built as part of the FlyRank Backend AI Engineering Internship.
 
----
-
-## Assignment
-
-**Code:** BE-04  
-**Track:** Backend AI Engineering  
-**Phase:** Foundations
+This project demonstrates how to build a secure REST API using Flask, PostgreSQL, JWT Authentication, and Docker while following a layered backend architecture.
 
 ---
 
-## Features
+## ✨ Features
 
-- Flask REST API
-- PostgreSQL running in Docker
-- Docker Compose for running the entire stack
-- Repository Pattern
-- Service Layer
-- Environment variables using `.env`
-- Persistent PostgreSQL storage using Docker Volumes
+- 🔐 User Registration
+- 🔑 User Login
+- 🔒 JWT Authentication
+- 🛡️ Protected Routes
+- 🔑 Password Hashing using bcrypt
+- 🐘 PostgreSQL Integration
+- 🐳 Docker & Docker Compose
+- 📂 Layered Architecture (Routes → Services → Repository)
+- ⚙️ Environment Variable Configuration
+- 🌐 RESTful API Design
 
 ---
 
-## Project Structure
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Language | Python 3.12 |
+| Framework | Flask |
+| Database | PostgreSQL |
+| Authentication | JWT (PyJWT) |
+| Password Security | bcrypt |
+| Database Driver | psycopg3 |
+| Containerization | Docker & Docker Compose |
+
+---
+
+## 📁 Project Structure
 
 ```text
 minimal-backend/
-│
+
 ├── database/
 │   ├── db.py
 │   └── init.sql
 │
+├── middleware/
+│   └── auth_middleware.py
+│
 ├── repositories/
-│   ├── repository_interface.py
+│   ├── patient_repository.py
+│   ├── user_repository.py
 │   ├── memory_repository.py
-│   └── postgres_repository.py
+│   └── repository_interface.py
 │
 ├── routes/
+│   ├── auth_routes.py
 │   └── patient_routes.py
 │
 ├── services/
+│   ├── auth_service.py
 │   └── patient_services.py
 │
-├── .env.example
-├── .gitignore
 ├── app.py
-├── docker-compose.yml
 ├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-# Architecture
+## 🏗️ Architecture
 
-```text
-Postman
-      │
-      ▼
-Flask Routes
-      │
-      ▼
-Patient Service
-      │
-      ▼
-Repository Interface
-      │
- ┌────┴──────────┐
- │               │
- ▼               ▼
-Memory      PostgreSQL
-Repository   Repository
 ```
-
-Only the repository implementation changes.
-
-The service layer and route layer remain unchanged.
-
----
-
-# Technologies Used
-
-- Python 3.12
-- Flask
-- PostgreSQL
-- Docker
-- Docker Compose
-- Psycopg 3
-- python-dotenv
-
----
-
-# Setup
-
-## Clone Repository
-
-```bash
-git clone <repository-url>
-cd minimal-backend
+             Client
+                │
+                ▼
+          Flask Routes
+                │
+                ▼
+          Service Layer
+                │
+                ▼
+        Repository Layer
+                │
+                ▼
+          PostgreSQL
 ```
 
 ---
 
-## Create Environment File
+## 🔑 Authentication Flow
+
+```
+User Registration
+
+↓
+
+Validate Input
+
+↓
+
+Hash Password (bcrypt)
+
+↓
+
+Store User
+
+↓
+
+Login
+
+↓
+
+Verify Password
+
+↓
+
+Generate JWT
+
+↓
+
+Return Token
+
+↓
+
+Authorization:
+Bearer <JWT>
+
+↓
+
+Protected Endpoint
+```
+
+---
+
+## 📌 API Endpoints
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/register` | Register a new user |
+| POST | `/login` | Authenticate user and generate JWT |
+| GET | `/profile` | Protected route |
+| GET | `/patients` | Retrieve patients |
+| POST | `/patients` | Create patient |
+
+---
+
+## ⚙️ Environment Variables
 
 Create a `.env` file.
 
-Example:
-
 ```env
 DATABASE_URL=postgresql://postgres:password@postgres:5432/accessmed
+JWT_SECRET=your_secret_key
 ```
 
 ---
 
-## Run the Project
+## 🚀 Running the Project
+
+Clone the repository
+
+```bash
+git clone <repository-url>
+```
+
+Start Docker
 
 ```bash
 docker compose up --build
 ```
 
-The entire stack (Flask + PostgreSQL) starts with one command.
+The backend will be available at
 
----
-
-# API Endpoints
-
-## GET Patients
-
-```http
-GET /patients
 ```
-
-Response
-
-```json
-[]
+http://localhost:5000
 ```
 
 ---
 
-## Create Patient
+## 🧪 Example Requests
+
+### Register
 
 ```http
-POST /patients
+POST /register
 ```
-
-Request
 
 ```json
 {
-    "name": "Satyam",
-    "age": 20,
-    "disease": "Flu"
-}
-```
-
-Response
-
-```json
-{
-    "id": 1,
-    "name": "Satyam",
-    "age": 20,
-    "disease": "Flu"
+    "username":"Satyam",
+    "email":"abc@gmail.com",
+    "password":"hello123"
 }
 ```
 
 ---
 
-# Repository Swap
-
-The application follows the Repository Pattern.
-
-Initially, data could be stored using the in-memory repository.
-
-For this assignment, the repository implementation was changed to PostgreSQL.
-
-No changes were required in:
-
-- Service Layer
-- Route Layer
-
-Only the repository implementation changed.
-
----
-
-# Database Initialization
-
-Database tables are automatically created using
-
-```text
-database/init.sql
-```
-
-when PostgreSQL starts for the first time.
-
----
-
-# Persistence Verification
-
-Persistence was verified using the following process:
-
-1. Started the application using
-
-```bash
-docker compose up
-```
-
-2. Created patient records using the POST endpoint.
-
-3. Verified records using the GET endpoint.
-
-4. Stopped the containers.
-
-```bash
-docker compose down
-```
-
-5. Started the stack again.
-
-```bash
-docker compose up
-```
-
-6. Retrieved the records again using
+### Login
 
 ```http
-GET /patients
+POST /login
 ```
 
-The records remained available, confirming that PostgreSQL data persisted through the Docker volume.
-
----
-
-# Environment Variables
-
-`.env` is excluded from Git.
-
-A sample configuration is provided in
-
-```text
-.env.example
+```json
+{
+    "email":"abc@gmail.com",
+    "password":"hello123"
+}
 ```
 
 ---
 
-# Docker Volume
+### Protected Route
 
-PostgreSQL uses a named Docker volume for persistent storage.
+```http
+GET /profile
+```
 
-This ensures that data survives container restarts.
+Header
 
----
-
-# Requirements
-
-Install dependencies locally (optional):
-
-```bash
-pip install -r requirements.txt
+```
+Authorization: Bearer <JWT_TOKEN>
 ```
 
 ---
 
-# Future Improvements
+## 📈 Future Improvements
 
+- Refresh Tokens
+- Role-Based Access Control (RBAC)
+- Password Reset
+- Email Verification
+- SQLAlchemy ORM
+- Flask-Migrate
+- Swagger/OpenAPI Documentation
+- Unit & Integration Testing
+- GitHub Actions CI/CD
+- Production Deployment
+
+---
+
+## 📚 Learning Outcomes
+
+Through this project I gained practical experience with:
+
+- Flask REST APIs
+- PostgreSQL Integration
+- Docker
+- Docker Compose
 - JWT Authentication
-- Redis Caching
-- User Management
-- CRUD Operations
-- API Validation
-- Logging
-- Unit Testing
+- Password Hashing with bcrypt
+- Middleware
+- Layered Backend Architecture
+- Repository Pattern
+- Environment-based Configuration
 
 ---
 
-# Author
+## 📄 License
 
-Satyam Shekhar
-
-Backend AI Engineering Track
+This project was developed for educational purposes as part of the FlyRank Backend AI Engineering Internship.
